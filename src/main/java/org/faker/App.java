@@ -67,7 +67,7 @@ public class App
             if(con != null) {
                 con.setAutoCommit(false);
 
-                for(int i = 0; i < QNT; i += 1) {
+                for(int i = 0; i < QNT + 900; i += 1) {
                     String query = "insert into perfil(nome_completo, rga, siapi, cpf, codigo_uri, status_participante, " +
                             "status_voluntario, status_tecnico) values(?, ?, ?, ?, ?, ?, ?, ?)";
                     PreparedStatement statement = con.prepareStatement(query);
