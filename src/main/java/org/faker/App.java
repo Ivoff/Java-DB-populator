@@ -2,15 +2,13 @@ package org.faker;
 
 import com.github.javafaker.Faker;
 import org.faker.resources.Postgres;
-import org.postgresql.util.PSQLException;
 
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.*;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Hello world!
@@ -36,6 +34,25 @@ public class App
             }
         }catch(Exception e){
             e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    private static List<Integer> getTableId(String tableName){
+        List<Integer> tableIds = new ArrayList<Integer>();
+        Connection con = Postgres.connect();
+        if(con != null) {
+            String query = "select id from  " + tableName;
+            try {
+                ResultSet result = con.createStatement().executeQuery(query);
+                while (result.next()){
+                    tableIds.add(result.getInt("id"));
+                }
+                return tableIds;
+            }catch (SQLException e){
+                e.printStackTrace();
+            }
         }
 
         return null;
@@ -73,11 +90,12 @@ public class App
                 }
                 con.commit();
 
+                List<Integer> perfilIdList = getTableId("perfil");
                 for(int i = 0; i < QNT; i += 1){
                     String query = "insert into equipe(criador_perfil_id, nome, descricao) values(?, ?, ?)";
                     PreparedStatement statement = con.prepareStatement(query);
-                    statement.setInt(1, faker.number().numberBetween(1, 100));
-                    statement.setString(2, faker.team().name());
+                    statement.setInt(1, perfilIdList.get(faker.number().numberBetween(1, perfilIdList.size())));
+                    statement.setString(2, faker.lorem().sentence(3));
                     statement.setString(3, faker.lorem().paragraph(7));
                     statement.executeUpdate();
                     statement.close();
@@ -88,25 +106,26 @@ public class App
 
                 Map<String, Integer> equipeRange = getLimit("equipe", "id");
 
+                List<Integer> equipeIdList = getTableId("equipe");
                 for(int i = 0; i < 100; i += 1){
                     String query = "insert into membro(perfil_id, equipe_id) values(?, ?)";
                     PreparedStatement statement = con.prepareStatement(query);
-                    statement.setInt(1, faker.number().numberBetween(perfilRange.get("minimo"), perfilRange.get("maximo")));
-                    statement.setInt(2, faker.number().numberBetween(equipeRange.get("minimo"), equipeRange.get("maximo")));
+                    statement.setInt(1, perfilIdList.get(faker.number().numberBetween(1, perfilIdList.size())));
+                    statement.setInt(2, equipeIdList.get(faker.number().numberBetween(1, equipeIdList.size())));
                     statement.executeUpdate();
                     statement.close();
                 }
                 con.commit();
 
                 SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
-                Date low = formatter.parse("13/10/2019");
-                Date sup = formatter.parse("06/09/2021");
+                Date low = Date.from(Instant.now().plus(60, ChronoUnit.SECONDS));
+                Date sup = formatter.parse("06/09/2025");
                 for(int i = 0; i < 100; i += 1){
                     String query = "insert into maratona(nome, inscricao_comeco, inscricao_termino, " +
                             "horario_comeco, horario_termino, numero_maximo_time, numero_maximo_participantes_time) " +
                             "values (?, ?, ?, ?, ?, ?, ?)";
                     PreparedStatement statement = con.prepareStatement(query);
-                    statement.setString(1, faker.lordOfTheRings().location());
+                    statement.setString(1, faker.lorem().sentence(4));
 
                     Instant subBeginDate = faker.date().between(low, sup).toInstant();
                     Instant subEndDate = subBeginDate.plus(faker.number().numberBetween(15, 60), ChronoUnit.DAYS);
@@ -122,12 +141,13 @@ public class App
                 }
 
                 Map<String, Integer> maratonaRange = getLimit("maratona", "id");
+                List<Integer> maratonaIdList = getTableId("maratona");
                 for(int i = 0; i < 100; i += 1){
                     String query = "insert into equipemaratona(maratona_id, equipe_id, status_equipe, pontuacao_final) " +
                             "values(?, ?, ?, ?)";
                     PreparedStatement statement = con.prepareStatement(query);
-                    statement.setInt(1, faker.number().numberBetween(maratonaRange.get("minimo"), maratonaRange.get("maximo")));
-                    statement.setInt(2, faker.number().numberBetween(equipeRange.get("minimo"), equipeRange.get("maximo")));
+                    statement.setInt(1, maratonaIdList.get(faker.number().numberBetween(1, maratonaIdList.size())));
+                    statement.setInt(2, equipeIdList.get(faker.number().numberBetween(1, equipeIdList.size())));
                     statement.setInt(3, faker.number().numberBetween(0, 2));
                     statement.setDouble(4, faker.number().randomDouble(10, 0, 100));
                     statement.executeUpdate();
