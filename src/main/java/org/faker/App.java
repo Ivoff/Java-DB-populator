@@ -102,21 +102,10 @@ public class App
                 }
                 con.commit();
 
-                List<Integer> equipeIdList = getTableId("equipe");
-                for(int i = 0; i < 100; i += 1){
-                    String query = "insert into membro(perfil_id, equipe_id) values(?, ?)";
-                    PreparedStatement statement = con.prepareStatement(query);
-                    statement.setInt(1, perfilIdList.get(faker.number().numberBetween(1, perfilIdList.size())));
-                    statement.setInt(2, equipeIdList.get(faker.number().numberBetween(1, equipeIdList.size())));
-                    statement.executeUpdate();
-                    statement.close();
-                }
-                con.commit();
-
                 SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
                 Date low = Date.from(Instant.now().plus(60, ChronoUnit.SECONDS));
                 Date sup = formatter.parse("06/09/2025");
-                for(int i = 0; i < 100; i += 1){
+                for(int i = 0; i < QNT + 400; i += 1){
                     String query = "insert into maratona(nome, inscricao_comeco, inscricao_termino, " +
                             "horario_comeco, horario_termino, numero_maximo_time, numero_maximo_participantes_time) " +
                             "values (?, ?, ?, ?, ?, ?, ?)";
@@ -136,18 +125,6 @@ public class App
                 }
                 con.commit();
 
-                List<Integer> maratonaIdList = getTableId("maratona");
-                for(int i = 0; i < 100; i += 1){
-                    String query = "insert into equipemaratona(maratona_id, equipe_id, status_equipe, pontuacao_final) " +
-                            "values(?, ?, ?, ?)";
-                    PreparedStatement statement = con.prepareStatement(query);
-                    statement.setInt(1, maratonaIdList.get(faker.number().numberBetween(1, maratonaIdList.size())));
-                    statement.setInt(2, equipeIdList.get(faker.number().numberBetween(1, equipeIdList.size())));
-                    statement.setInt(3, faker.number().numberBetween(0, 2));
-                    statement.setDouble(4, faker.number().randomDouble(10, 0, 100));
-                    statement.executeUpdate();
-                }
-                con.commit();
 
                 for(int i = 0; i < QNT + 400; i += 1){
                     String query = "insert into questoes(descricao, entrada, saida, dificuldade, titulo) values (?, ?, ?, ?, ?)";
@@ -157,39 +134,6 @@ public class App
                     statement.setString(3, faker.lorem().paragraph());
                     statement.setInt(4, faker.number().numberBetween(1, 11));
                     statement.setString(5, faker.lorem().sentence());
-                    statement.executeUpdate();
-                }
-                con.commit();
-
-                for(int i = 0; i < QNT; i += 1){
-                    String query = "insert into participante(perfil_id, maratona_id, tipo_participante) values(?, ?, ?)";
-                    PreparedStatement statement = con.prepareStatement(query);
-                    statement.setInt(1, perfilIdList.get(faker.number().numberBetween(1, perfilIdList.size())));
-                    statement.setInt(2, maratonaIdList.get(faker.number().numberBetween(1, maratonaIdList.size())));
-                    statement.setInt(3, faker.number().numberBetween(1, 3));
-                    statement.executeUpdate();
-                }
-                con.commit();
-
-                List<Integer> questaoIdList = getTableId("questoes");
-                for(int i = 0; i < QNT + 100; i += 1){
-                    String query = "insert into maratonaquestoes(maratona_id, questao_id) values(?, ?)";
-                    PreparedStatement statement = con.prepareStatement(query);
-                    statement.setInt(1, maratonaIdList.get(faker.number().numberBetween(1, maratonaIdList.size())));
-                    statement.setInt(2, questaoIdList.get(faker.number().numberBetween(1, questaoIdList.size())));
-                    statement.executeUpdate();
-                }
-                con.commit();
-
-                List<Integer> maratonaQuestoesIdList = getTableId("maratonaquestoes");
-                for(int i = 0; i < QNT; i += 1){
-                    String query = "insert into equipemaratonaquestao(maratona_questoes_id, equipe_id, maratona_id, pontuacao, tentativas) values(?, ?, ?, ?, ?)";
-                    PreparedStatement statement = con.prepareStatement(query);
-                    statement.setInt(1, maratonaIdList.get(faker.number().numberBetween(1, maratonaQuestoesIdList.size())));
-                    statement.setInt(2, equipeIdList.get(faker.number().numberBetween(1, equipeIdList.size())));
-                    statement.setInt(3, maratonaIdList.get(faker.number().numberBetween(1, maratonaIdList.size())));
-                    statement.setDouble(4, faker.number().randomDouble(5, 0, 10));
-                    statement.setInt(5, faker.number().numberBetween(0, 15));
                     statement.executeUpdate();
                 }
                 con.commit();
