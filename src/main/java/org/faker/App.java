@@ -2,6 +2,7 @@ package org.faker;
 
 import com.github.javafaker.Faker;
 import org.faker.resources.Postgres;
+import org.postgresql.util.PSQLException;
 
 import java.sql.*;
 import java.text.SimpleDateFormat;
@@ -17,6 +18,8 @@ import java.util.Map;
  */
 public class App
 {
+    private static final int QNT = 100;
+
     private static Map<String, Integer> getLimit(String tableName, String columnName){
         Connection con = Postgres.connect();
         try {
@@ -47,7 +50,7 @@ public class App
             if(con != null) {
                 con.setAutoCommit(false);
 
-                for(int i = 0; i < 100; i += 1) {
+                for(int i = 0; i < QNT; i += 1) {
                     String query = "insert into perfil(nome_completo, rga, siapi, cpf, codigo_uri, status_participante, " +
                             "status_voluntario, status_tecnico) values(?, ?, ?, ?, ?, ?, ?, ?)";
                     PreparedStatement statement = con.prepareStatement(query);
@@ -70,7 +73,7 @@ public class App
                 }
                 con.commit();
 
-                for(int i = 0; i < 100; i += 1){
+                for(int i = 0; i < QNT; i += 1){
                     String query = "insert into equipe(criador_perfil_id, nome, descricao) values(?, ?, ?)";
                     PreparedStatement statement = con.prepareStatement(query);
                     statement.setInt(1, faker.number().numberBetween(1, 100));
@@ -82,9 +85,9 @@ public class App
                 con.commit();
 
                 Map<String, Integer> perfilRange = getLimit("perfil", "id");
-                
+
                 Map<String, Integer> equipeRange = getLimit("equipe", "id");
-                
+
                 for(int i = 0; i < 100; i += 1){
                     String query = "insert into membro(perfil_id, equipe_id) values(?, ?)";
                     PreparedStatement statement = con.prepareStatement(query);
@@ -115,8 +118,8 @@ public class App
                     statement.setInt(7, faker.number().numberBetween(3, 5));
                     statement.executeUpdate();
                     statement.close();
+                    con.commit();
                 }
-                con.commit();
 
                 Map<String, Integer> maratonaRange = getLimit("maratona", "id");
                 for(int i = 0; i < 100; i += 1){
@@ -127,6 +130,18 @@ public class App
                     statement.setInt(2, faker.number().numberBetween(equipeRange.get("minimo"), equipeRange.get("maximo")));
                     statement.setInt(3, faker.number().numberBetween(0, 2));
                     statement.setDouble(4, faker.number().randomDouble(10, 0, 100));
+                    statement.executeUpdate();
+                    con.commit();
+                }
+
+                for(int i = 0; i < QNT; i += 1){
+                    String query = "insert into questoes(descricao, entrada, saida, dificuldade, titulo) values (?, ?, ?, ?, ?)";
+                    PreparedStatement statement = con.prepareStatement(query);
+                    statement.setString(1, faker.lorem().paragraph());
+                    statement.setString(2, faker.lorem().paragraph());
+                    statement.setString(3, faker.lorem().paragraph());
+                    statement.setInt(4, faker.number().numberBetween(1, 11));
+                    statement.setString(5, faker.lorem().sentence());
                     statement.executeUpdate();
                     con.commit();
                 }
