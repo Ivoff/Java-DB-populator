@@ -102,10 +102,6 @@ public class App
                 }
                 con.commit();
 
-                Map<String, Integer> perfilRange = getLimit("perfil", "id");
-
-                Map<String, Integer> equipeRange = getLimit("equipe", "id");
-
                 List<Integer> equipeIdList = getTableId("equipe");
                 for(int i = 0; i < 100; i += 1){
                     String query = "insert into membro(perfil_id, equipe_id) values(?, ?)";
@@ -137,10 +133,9 @@ public class App
                     statement.setInt(7, faker.number().numberBetween(3, 5));
                     statement.executeUpdate();
                     statement.close();
-                    con.commit();
                 }
+                con.commit();
 
-                Map<String, Integer> maratonaRange = getLimit("maratona", "id");
                 List<Integer> maratonaIdList = getTableId("maratona");
                 for(int i = 0; i < 100; i += 1){
                     String query = "insert into equipemaratona(maratona_id, equipe_id, status_equipe, pontuacao_final) " +
@@ -151,10 +146,10 @@ public class App
                     statement.setInt(3, faker.number().numberBetween(0, 2));
                     statement.setDouble(4, faker.number().randomDouble(10, 0, 100));
                     statement.executeUpdate();
-                    con.commit();
                 }
+                con.commit();
 
-                for(int i = 0; i < QNT; i += 1){
+                for(int i = 0; i < QNT + 400; i += 1){
                     String query = "insert into questoes(descricao, entrada, saida, dificuldade, titulo) values (?, ?, ?, ?, ?)";
                     PreparedStatement statement = con.prepareStatement(query);
                     statement.setString(1, faker.lorem().paragraph());
@@ -163,8 +158,41 @@ public class App
                     statement.setInt(4, faker.number().numberBetween(1, 11));
                     statement.setString(5, faker.lorem().sentence());
                     statement.executeUpdate();
-                    con.commit();
                 }
+                con.commit();
+
+                for(int i = 0; i < QNT; i += 1){
+                    String query = "insert into participante(perfil_id, maratona_id, tipo_participante) values(?, ?, ?)";
+                    PreparedStatement statement = con.prepareStatement(query);
+                    statement.setInt(1, perfilIdList.get(faker.number().numberBetween(1, perfilIdList.size())));
+                    statement.setInt(2, maratonaIdList.get(faker.number().numberBetween(1, maratonaIdList.size())));
+                    statement.setInt(3, faker.number().numberBetween(1, 3));
+                    statement.executeUpdate();
+                }
+                con.commit();
+
+                List<Integer> questaoIdList = getTableId("questoes");
+                for(int i = 0; i < QNT + 100; i += 1){
+                    String query = "insert into maratonaquestoes(maratona_id, questao_id) values(?, ?)";
+                    PreparedStatement statement = con.prepareStatement(query);
+                    statement.setInt(1, maratonaIdList.get(faker.number().numberBetween(1, maratonaIdList.size())));
+                    statement.setInt(2, questaoIdList.get(faker.number().numberBetween(1, questaoIdList.size())));
+                    statement.executeUpdate();
+                }
+                con.commit();
+
+                List<Integer> maratonaQuestoesIdList = getTableId("maratonaquestoes");
+                for(int i = 0; i < QNT; i += 1){
+                    String query = "insert into equipemaratonaquestao(maratona_questoes_id, equipe_id, maratona_id, pontuacao, tentativas) values(?, ?, ?, ?, ?)";
+                    PreparedStatement statement = con.prepareStatement(query);
+                    statement.setInt(1, maratonaIdList.get(faker.number().numberBetween(1, maratonaQuestoesIdList.size())));
+                    statement.setInt(2, equipeIdList.get(faker.number().numberBetween(1, equipeIdList.size())));
+                    statement.setInt(3, maratonaIdList.get(faker.number().numberBetween(1, maratonaIdList.size())));
+                    statement.setDouble(4, faker.number().randomDouble(5, 0, 10));
+                    statement.setInt(5, faker.number().numberBetween(0, 15));
+                    statement.executeUpdate();
+                }
+                con.commit();
             }
         }catch (Exception e){
             e.printStackTrace();
